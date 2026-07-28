@@ -37,6 +37,7 @@ Route::middleware('esf.auth')->group(function () {
         Route::post('/enrollment/re-entry/{student}', [EnrollmentController::class, 'storeReEntry'])->name('enrollment.reentry.store');
 
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+        Route::get('/students/graduates', [StudentController::class, 'graduates'])->name('students.graduates');
         Route::get('/students/section/{section}', [StudentController::class, 'sectionRoster'])->name('students.section');
 
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

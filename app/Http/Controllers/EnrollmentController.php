@@ -142,6 +142,8 @@ class EnrollmentController extends Controller
         $student->uid = (string) $data['uid'];
         $student->grading = $grading?->grading ?? 'First Grading';
         $student->sy = $grading?->sy ?? date('Y') . '-' . (date('Y') + 1);
+        $student->final_rating = '';
+        $student->status = '';
         $student->save();
 
         return redirect()->route('students.index')->with('ok', 'Student re-enrolled successfully.');

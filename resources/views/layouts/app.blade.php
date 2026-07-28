@@ -124,7 +124,7 @@
         </div>
         @auth
         <nav class="nav">
-            <a href="{{ route('dashboard') }}">Control Panel</a>
+            <a href="{{ route('dashboard') }}">Dashboard</a>
             @if(auth()->user()->utype === 'admin')
                 <a href="{{ route('enrollment.intake') }}">Add Student Records</a>
                 <a href="{{ route('students.index') }}">View Students</a>
@@ -132,7 +132,7 @@
                 <a href="{{ route('users.index') }}">User Accounts</a>
             @endif
             @if(auth()->user()->utype === 'teacher')
-                <a href="{{ route('grades.index') }}">Add Record</a>
+                <a href="{{ route('grades.index') }}">Student Record</a>
             @endif
             <form method="post" action="{{ route('logout') }}">
                 @csrf

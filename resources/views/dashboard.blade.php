@@ -3,7 +3,7 @@
 @section('content')
 <div class="head">
     <div>
-        <h2>Control Panel</h2>
+        <h2>Dashboard</h2>
         <div class="muted">{{ auth()->user()->fullname }} | {{ strtoupper(auth()->user()->utype) }}</div>
     </div>
     <div class="badge ok">SY {{ $summary['current_sy'] }} | {{ $summary['current_term'] }}</div>

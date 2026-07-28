@@ -15,12 +15,19 @@ class DashboardController extends Controller
         $currentSy = $grading?->sy ?? $request->session()->get('sy');
         $currentTerm = $grading?->grading ?? $request->session()->get('grading');
 
+        $activeCurrentSy = Student::where('sy', $currentSy)
+            ->where(function ($query) {
+                $query->whereNull('status')
+                    ->orWhere('status', '')
+                    ->orWhere('status', 'Retained');
+            });
+
         $summary = [
             'total_students' => Student::count(),
             'total_users' => User::count(),
-            'enrolled_this_sy' => Student::where('sy', $currentSy)->count(),
-            'male' => Student::where('sy', $currentSy)->where('sex', 'Male')->count(),
-            'female' => Student::where('sy', $currentSy)->where('sex', 'Female')->count(),
+            'enrolled_this_sy' => (clone $activeCurrentSy)->count(),
+            'male' => (clone $activeCurrentSy)->where('sex', 'Male')->count(),
+            'female' => (clone $activeCurrentSy)->where('sex', 'Female')->count(),
             'current_sy' => $currentSy,
             'current_term' => $currentTerm,
         ];

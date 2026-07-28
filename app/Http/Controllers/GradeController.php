@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\DB;
 
 class GradeController extends Controller
 {
+    private function isActiveStudentStatus(?string $status): bool
+    {
+        return !in_array($status, ['Promoted', 'Graduated'], true);
+    }
+
     private function computeMapeh(array $data): string
     {
         $music = (float) ($data['s9'] ?? 0);
@@ -55,6 +60,89 @@ class GradeController extends Controller
             ->keyBy('grading');
     }
 
+    private function computeStudentFinalRating(Student $student, array $terms, string $sy): ?int
+    {
+        $rows = Record::where('sname_id', $student->id)
+            ->where('sy', $sy)
+            ->whereIn('grading', $terms)
+            ->get()
+            ->keyBy('grading');
+
+        if ($rows->count() !== count($terms)) {
+            return null;
+        }
+
+        $subjects = Subject::orderBy('id')->get();
+        $subjectAverages = [];
+
+        foreach ($subjects as $index => $subject) {
+            $key = 's' . ($index + 1);
+            $termValues = [];
+
+            foreach ($terms as $term) {
+                $row = $rows->get($term);
+                if (!$row) {
+                    continue;
+                }
+
+                $value = data_get($row, $key);
+                if ($key === 's8') {
+                    $value = round((((float) data_get($row, 's9')) + ((float) data_get($row, 's10')) + ((float) data_get($row, 's11')) + ((float) data_get($row, 's12'))) / 4, 2);
+                }
+
+                if ($value !== null && $value !== '') {
+                    $termValues[] = (float) $value;
+                }
+            }
+
+            if (count($termValues) > 0) {
+                $subjectAverages[] = round(array_sum($termValues) / count($termValues));
+            }
+        }
+
+        if (count($subjectAverages) === 0) {
+            return null;
+        }
+
+        return (int) round(array_sum($subjectAverages) / count($subjectAverages));
+    }
+
+    private function computeCumulativeFinalRating(Student $student, array $terms): ?int
+    {
+        $schoolYears = Record::where('sname_id', $student->id)
+            ->select('sy')
+            ->distinct()
+            ->orderBy('sy')
+            ->pluck('sy');
+
+        $yearlyRatings = [];
+        foreach ($schoolYears as $schoolYear) {
+            $yearlyRating = $this->computeStudentFinalRating($student, $terms, $schoolYear);
+            if ($yearlyRating !== null) {
+                $yearlyRatings[] = $yearlyRating;
+            }
+        }
+
+        if (count($yearlyRatings) === 0) {
+            return null;
+        }
+
+        return (int) round(array_sum($yearlyRatings) / count($yearlyRatings));
+    }
+
+    private function resolveCompletionStatus(Student $student, ?int $finalRating): string
+    {
+        if ($finalRating === null) {
+            return '';
+        }
+
+        if ($finalRating < 75) {
+            return 'Retained';
+        }
+
+        return $student->grade === 'Grade 10' ? 'Graduated' : 'Promoted';
+    }
+
     public function index()
     {
         $teacherId = (string) Auth::id();
@@ -64,6 +152,11 @@ class GradeController extends Controller
 
         $students = Student::where('uid', $teacherId)
             ->where('sy', $grading?->sy)
+            ->where(function ($query) {
+                $query->whereNull('status')
+                    ->orWhere('status', '')
+                    ->orWhere('status', 'Retained');
+            })
             ->orderBy('grade')
             ->orderBy('section')
             ->orderBy('lname')
@@ -267,7 +360,14 @@ class GradeController extends Controller
 
         foreach ($students as $student) {
             foreach ($terms as $term) {
-                $has = InputtedGrade::where('sname_id', $student->id)->where('sy', $grading?->sy)->where('grading', $term)->exists();
+                $has = InputtedGrade::where('sname_id', $student->id)
+                    ->where('sy', $grading?->sy)
+                    ->where('grading', $term)
+                    ->exists()
+                    || Record::where('sname_id', $student->id)
+                        ->where('sy', $grading?->sy)
+                        ->where('grading', $term)
+                        ->exists();
                 if (!$has) {
                     return back()->with('error', "Missing {$term} grades for {$student->sname}.");
                 }
@@ -275,6 +375,7 @@ class GradeController extends Controller
         }
 
         DB::transaction(function () use ($teacherId, $grading) {
+            $terms = GradingTerm::orderBy('term_order')->pluck('term_name')->all();
             $grades = InputtedGrade::where('uid', $teacherId)->where('sy', $grading?->sy)->get();
 
             foreach ($grades as $grade) {
@@ -282,6 +383,19 @@ class GradeController extends Controller
                     'sname_id', 'uid', 'section', 'grade', 'grading', 'sy',
                     's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12',
                 ]) + ['status' => '']);
+            }
+
+            $students = Student::where('uid', $teacherId)
+                ->where('sy', $grading?->sy)
+                ->get();
+
+            foreach ($students as $student) {
+                $schoolYearFinalRating = $this->computeStudentFinalRating($student, $terms, $grading?->sy ?? $student->sy);
+                $finalRating = $this->computeCumulativeFinalRating($student, $terms);
+                $student->update([
+                    'final_rating' => $finalRating === null ? '' : (string) $finalRating,
+                    'status' => $this->resolveCompletionStatus($student, $schoolYearFinalRating),
+                ]);
             }
 
             InputtedGrade::where('uid', $teacherId)->where('sy', $grading?->sy)->delete();

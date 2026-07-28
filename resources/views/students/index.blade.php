@@ -2,7 +2,13 @@
 
 @section('content')
 <div class="card">
-    <div class="head"><h2>All Enrolled Students</h2><div class="muted">Current SY: {{ $currentSy }}</div></div>
+    <div class="head">
+        <h2>All Enrolled Students</h2>
+        <div style="display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;">
+            <a href="{{ route('students.graduates') }}" class="btn alt">View Graduates</a>
+            <div class="muted">Current SY: {{ $currentSy }}</div>
+        </div>
+    </div>
     <form method="get" class="grid three">
         <div>
             <label>Search</label>
