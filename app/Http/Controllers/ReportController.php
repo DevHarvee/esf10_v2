@@ -12,6 +12,19 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
+    private function buildColumnSpans(int $totalColumns, int $groupCount): array
+    {
+        $base = intdiv($totalColumns, $groupCount);
+        $remainder = $totalColumns % $groupCount;
+        $spans = [];
+
+        for ($i = 0; $i < $groupCount; $i++) {
+            $spans[] = $base + ($i < $remainder ? 1 : 0);
+        }
+
+        return $spans;
+    }
+
     private function getPermanentData(Student $student): array
     {
         $terms = GradingTerm::orderBy('term_order')->pluck('term_name')->all();
@@ -31,8 +44,9 @@ class ReportController extends Controller
 
         $quarterColumnCount = count($terms);
         $tableColumnCount = $quarterColumnCount + 6;
+        $remedialSpans = $this->buildColumnSpans($tableColumnCount, 5);
 
-        return compact('student', 'terms', 'subjects', 'records', 'quarterColumnCount', 'tableColumnCount');
+        return compact('student', 'terms', 'subjects', 'records', 'quarterColumnCount', 'tableColumnCount', 'remedialSpans');
     }
 
     public function permanent(Student $student)

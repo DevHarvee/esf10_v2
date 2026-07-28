@@ -4,10 +4,41 @@
 <div class="card">
     <div class="head"><h2>All Enrolled Students</h2><div class="muted">Current SY: {{ $currentSy }}</div></div>
     <form method="get" class="grid three">
-        <input name="q" value="{{ request('q') }}" placeholder="Search name, ID, or LRN">
-        <input name="grade" value="{{ request('grade') }}" placeholder="Grade">
-        <input name="section" value="{{ request('section') }}" placeholder="Section">
-        <button type="submit">Filter</button>
+        <div>
+            <label>Search</label>
+            <input name="q" value="{{ request('q') }}" placeholder="Name, ID, or LRN">
+        </div>
+        <div>
+            <label>Grade</label>
+            <select name="grade">
+                <option value="">All Grades</option>
+                @foreach($gradeOptions as $grade)
+                    <option value="{{ $grade }}" @selected(request('grade') === $grade)>{{ $grade }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label>Section</label>
+            <select name="section">
+                <option value="">All Sections</option>
+                @foreach($sectionOptions as $section)
+                    <option value="{{ $section }}" @selected(request('section') === $section)>{{ $section }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label>Sex</label>
+            <select name="sex">
+                <option value="">All</option>
+                @foreach($sexOptions as $sex)
+                    <option value="{{ $sex }}" @selected(request('sex') === $sex)>{{ $sex }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div style="display:flex; align-items:flex-end; gap:.5rem;">
+            <button type="submit">Apply Filters</button>
+            <a href="{{ route('students.index') }}" class="btn alt">Reset</a>
+        </div>
     </form>
 </div>
 <div class="card">

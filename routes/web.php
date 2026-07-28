@@ -41,8 +41,15 @@ Route::middleware('esf.auth')->group(function () {
 
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings/grading', [SettingsController::class, 'updateGrading'])->name('settings.grading');
+        Route::post('/settings/terms', [SettingsController::class, 'addTerm'])->name('settings.terms');
+        Route::put('/settings/terms/{term}', [SettingsController::class, 'updateTerm'])->name('settings.terms.update');
+        Route::delete('/settings/terms/{term}', [SettingsController::class, 'deleteTerm'])->name('settings.terms.delete');
         Route::post('/settings/sections', [SettingsController::class, 'addSection'])->name('settings.sections');
+        Route::put('/settings/sections/{section}', [SettingsController::class, 'updateSection'])->name('settings.sections.update');
+        Route::delete('/settings/sections/{section}', [SettingsController::class, 'deleteSection'])->name('settings.sections.delete');
         Route::post('/settings/subjects', [SettingsController::class, 'addSubject'])->name('settings.subjects');
+        Route::put('/settings/subjects/{subject}', [SettingsController::class, 'updateSubject'])->name('settings.subjects.update');
+        Route::delete('/settings/subjects/{subject}', [SettingsController::class, 'deleteSubject'])->name('settings.subjects.delete');
 
         Route::get('/users', [UserAccountController::class, 'index'])->name('users.index');
         Route::post('/users', [UserAccountController::class, 'store'])->name('users.store');

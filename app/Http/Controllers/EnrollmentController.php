@@ -33,7 +33,13 @@ class EnrollmentController extends Controller
     public function newEntry(Request $request)
     {
         $sections = Section::orderBy('grade_yr')->orderBy('section')->get();
-        $teachers = User::where('utype', 'teacher')->orderBy('fullname')->get();
+        $teachers = User::where('utype', 'teacher')
+            ->whereNotNull('assigned_grade')
+            ->where('assigned_grade', '!=', '')
+            ->whereNotNull('assigned_section')
+            ->where('assigned_section', '!=', '')
+            ->orderBy('fullname')
+            ->get();
 
         return view('enrollment.new', [
             'studentId' => $request->query('id', ''),
@@ -45,7 +51,13 @@ class EnrollmentController extends Controller
     public function reEntry(Student $student)
     {
         $sections = Section::orderBy('grade_yr')->orderBy('section')->get();
-        $teachers = User::where('utype', 'teacher')->orderBy('fullname')->get();
+        $teachers = User::where('utype', 'teacher')
+            ->whereNotNull('assigned_grade')
+            ->where('assigned_grade', '!=', '')
+            ->whereNotNull('assigned_section')
+            ->where('assigned_section', '!=', '')
+            ->orderBy('fullname')
+            ->get();
 
         return view('enrollment.reentry', compact('student', 'sections', 'teachers'));
     }
@@ -68,7 +80,14 @@ class EnrollmentController extends Controller
                 'max:40',
                 Rule::exists('sections', 'section')->where(fn ($query) => $query->where('grade_yr', $request->input('grade'))),
             ],
-            'uid' => ['required', 'integer'],
+            'uid' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'uid')->where(fn ($query) => $query
+                    ->where('utype', 'teacher')
+                    ->where('assigned_grade', $request->input('grade'))
+                    ->where('assigned_section', $request->input('section'))),
+            ],
         ]);
 
         $grading = Grading::first();
@@ -107,7 +126,14 @@ class EnrollmentController extends Controller
                 'max:40',
                 Rule::exists('sections', 'section')->where(fn ($query) => $query->where('grade_yr', $request->input('grade'))),
             ],
-            'uid' => ['required', 'integer'],
+            'uid' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'uid')->where(fn ($query) => $query
+                    ->where('utype', 'teacher')
+                    ->where('assigned_grade', $request->input('grade'))
+                    ->where('assigned_section', $request->input('section'))),
+            ],
         ]);
 
         $grading = Grading::first();

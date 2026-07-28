@@ -13,6 +13,7 @@ class StudentController extends Controller
     {
         $currentSy = Grading::first()?->sy;
 
+        $baseQuery = Student::query()->where('sy', $currentSy);
         $query = Student::query()->where('sy', $currentSy);
 
         if ($request->filled('grade')) {
@@ -35,7 +36,31 @@ class StudentController extends Controller
 
         $students = $query->orderBy('grade')->orderBy('section')->orderBy('lname')->paginate(20)->withQueryString();
 
-        return view('students.index', compact('students', 'currentSy'));
+        $gradeOptions = (clone $baseQuery)
+            ->select('grade')
+            ->whereNotNull('grade')
+            ->where('grade', '!=', '')
+            ->distinct()
+            ->orderBy('grade')
+            ->pluck('grade');
+
+        $sectionOptions = (clone $baseQuery)
+            ->select('section')
+            ->whereNotNull('section')
+            ->where('section', '!=', '')
+            ->distinct()
+            ->orderBy('section')
+            ->pluck('section');
+
+        $sexOptions = (clone $baseQuery)
+            ->select('sex')
+            ->whereNotNull('sex')
+            ->where('sex', '!=', '')
+            ->distinct()
+            ->orderBy('sex')
+            ->pluck('sex');
+
+        return view('students.index', compact('students', 'currentSy', 'gradeOptions', 'sectionOptions', 'sexOptions'));
     }
 
     public function sectionRoster(string $section)

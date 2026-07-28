@@ -149,25 +149,25 @@
                     <td colspan="{{ $tableColumnCount - 2 }}">Conducted</td>
                 </tr>
                 <tr>
-                    <td class="center" colspan="3">Learning Areas</td>
-                    <td class="center" colspan="2">Final Rating</td>
-                    <td class="center" colspan="2">Remedial Class Mark</td>
-                    <td class="center" colspan="2">Recomputed Final Grade</td>
-                    <td class="center" colspan="{{ max(1, $tableColumnCount - 9) }}">Remarks</td>
+                    <td class="center" colspan="{{ $remedialSpans[0] }}">Learning Areas</td>
+                    <td class="center" colspan="{{ $remedialSpans[1] }}">Final Rating</td>
+                    <td class="center" colspan="{{ $remedialSpans[2] }}">Remedial Class Mark</td>
+                    <td class="center" colspan="{{ $remedialSpans[3] }}">Recomputed Final Grade</td>
+                    <td class="center" colspan="{{ $remedialSpans[4] }}">Remarks</td>
                 </tr>
                 <tr>
-                    <td colspan="3">&nbsp;</td>
-                    <td colspan="2">&nbsp;</td>
-                    <td colspan="2">&nbsp;</td>
-                    <td colspan="2">&nbsp;</td>
-                    <td colspan="{{ max(1, $tableColumnCount - 9) }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[0] }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[1] }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[2] }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[3] }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[4] }}">&nbsp;</td>
                 </tr>
                 <tr>
-                    <td colspan="3">&nbsp;</td>
-                    <td colspan="2">&nbsp;</td>
-                    <td colspan="2">&nbsp;</td>
-                    <td colspan="2">&nbsp;</td>
-                    <td colspan="{{ max(1, $tableColumnCount - 9) }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[0] }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[1] }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[2] }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[3] }}">&nbsp;</td>
+                    <td colspan="{{ $remedialSpans[4] }}">&nbsp;</td>
                 </tr>
             @endforeach
         </tbody>
